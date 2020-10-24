@@ -1,0 +1,55 @@
+1.购物车展示的商品
+（1）在详情页添加购物车处添加点击事件addToCart
+（2）在addToCart中获取需要展示的购物车商品(接口处拿)
+（3）通过vuex进行状态管理
+（4）在addToCart中通过this.$store.dispatch(addCart, 购物车商品对象)
+（5）把商品通过state的cartList保存起来，然后在actions中判断添加的购物车商品的iid是否相等
+[1]相等的话把数据通过context.commit(addCounter, oldProduct)给mutations，然后接收事件，再者给count属性++
+[2]不相等的话把数据通过context.commit(addToCart, payload)给mutations，然后接收事件，再者给state的cartList通过数组方式push(数据)
+（6）使用getters计算属性来返回cartList商品的长度和数据，分别为cartLength,cartList属性
+
+代码：
+cartLength(state) {
+  return state.cartList.length
+},
+cartList(state) {
+  return state.cartList
+}
+
+2.在购物车Cart页面渲染展示的商品
+（1）在页面使用vuex的getters属性
+[1]可通过$store.getters.属性名
+[2]可通过导入import {mapGetters} from vuex的方法在computed中...mapGetters([vuex的getters属性名])
+（2）在导航栏中显示展示商品的个数：{{cartLength}}
+（3）渲染需要展示的商品
+（4）购物车的商品选中与不选中来回切换
+[1]商品的选中与不选中需要通过对象模型（vuex中push商品的函数中添加checked属性值为true）来判断,然后动态绑定个属性isChecked来显示按钮是否被选中，返回的是布尔值
+[2]在每个商品的组件中:is-checked="itemInfo.checked"，然后添加点击事件checkClick，每点击一下给itemInfo.checked属性进行取反，就能实现选中与不选中来回切换
+（5）选中商品的价格进行汇总
+通过checked的选定状态是否为true，是true就相乘，代码如下：
+totalPrice() {
+  return '￥' + this.$store.state.cartList.filter(item => {
+      return item.checked
+  }).reduce((preValue, item) => {
+      return preValue + item.price * item.count
+  }, 0).toFixed(2)
+}
+（6）选中商品的个数进行计算
+ Numbers() {
+   return this.$store.state.cartList.filter
+  (item => item.checked).length
+}
+（7）购物车的全选按钮（判断是否有一个不选中，全选就是不选中）
+[1]全选按钮为true时添加isChecked类名，代码如下
+isSelectAll() {
+    if (this.$store.state.cartList.length === 0) return false
+        return !this.$store.state.cartList.find(item => !item.checked)
+}
+[2]给全选按钮添加点击事件checkClick，代码如下：
+checkClick() {
+  if (this.isSelectAll) { //全被选中，全选按钮为true
+     this.$store.state.cartList.forEach(item => item.checked = false)
+}else { //有一个不选中，全选按钮为false
+     this.$store.state.cartList.forEach(item => item.checked = true)
+ }
+}

@@ -1,0 +1,56 @@
+请求分类的网络请求数据：
+data() {
+      return {
+        categories: [],
+        categoryData: {},
+        productKey: -1
+      }
+    }
+
+showSubcategory() {
+        if (this.productKey === -1) return {}
+        return this.categoryData[this.productKey].subcategories
+      },
+      showCategoryDetail() {
+        if (this.productKey === -1) return []
+        return this.categoryData[this.productKey].categoryDetail[this.currentType]
+      }
+
+getClassify() {
+        getClassify().then(res => {
+          this.categories = res.data.category.list
+          console.log(res);
+          // 初始化每个类别的子数据
+          for (let i = 0; i < this.categories.length; i++) {
+            this.categoryData[i] = {
+              subcategories: {},
+              categoryDetail: {
+                'pop': [],
+                'new': [],
+                'sell': []
+              }
+            }
+          }
+          // 请求第一个分类的数据
+          this.getSubcategory(0)
+        })
+      },
+      getSubcategory(index) {
+        this.productKey = index;
+        const mailKey = this.categories[index].maitKey;
+
+        getSubcategory(mailKey).then(res => {
+          this.categoryData[index].subcategories = res.data
+          this.categoryData = {...this.categoryData}
+          this.getSubcategoryDetail('pop')
+          this.getSubcategoryDetail('new')
+          this.getSubcategoryDetail('sell')
+        })
+      },
+      getSubcategoryDetail(type) {
+        const miniWallkey = this.categories[this.productKey].miniWallkey
+        getSubcategoryDetail(miniWallkey, type).then(res => {
+          this.categoryData[this.productKey].categoryDetail[type] = res
+          this.categoryData = {...this.categoryData}
+        })
+      }
